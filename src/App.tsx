@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { Button, ButtonProps, Form, FormControl, FormGroup, HelpBlock, Icon, Uploader } from 'rsuite';
 import { FileType } from 'rsuite/lib/Uploader';
 import 'rsuite/dist/styles/rsuite-default.css';
@@ -14,8 +14,6 @@ const Wrapper = styled.div`
   flex-direction: row;
   
 `;
-
-
 const WrapperForm = styled.div`
   background-color: #d3d3d376 ;
   padding: 25px;
@@ -50,9 +48,13 @@ function App() {
   // * requested data
   const [data, setData] = useState<dataType>({})
   const [dataFileName, setDataFileName] = useState<dataType>()
+  const [oldDataFileName, setOldDataFileName] = useState<dataType>()
 
+  //* validation message
   const [validationError, setValidationError] = useState<boolean>(false);
 
+  //* to stop uploader component to send
+  //? this feature could be extended substituting onSubmitCallback unction in this component
   const uploaderRef = useRef(null)
 
   const keywordsCallback = (formValue: any, e: React.FormEvent<HTMLInputElement>) => {
@@ -70,19 +72,14 @@ function App() {
 
     let newData = await uploadFile(file[0].blobFile, keywords)
 
-    //TODO verify this name
-    if (await newData.message) {
-      setDataFileName(newData.message.split('/').reverse()[0])
+    if (await newData) {
+      setOldDataFileName(newData.oldDocument.split('/').reverse()[0])
+      setDataFileName(newData.document.split('/').reverse()[0])
     }
     setData(newData)
 
     setKeywords('')
     setFile([])
-    return;
-  }
-
-  const downloadCallback = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    setData({})
   }
 
   const referenceCallback = (ref: any) => {
@@ -97,13 +94,18 @@ function App() {
 
 
   useEffect(() => {
+    keywords.length > 0 && file.length > 0 ? setValidationError(false) : setValidationError(true)
+
+    // ! FOR DEBUG PURPOSE ONLY
     console.log('file ', file)
     console.log('keywords', keywords)
     console.log('validationError', validationError)
-    keywords.length > 0 && file.length > 0 ? setValidationError(false) : setValidationError(true)
 
-  }, [file, keywords, validationError])
-
+  }, [validationError,
+    // ! FOR DEBUG PURPOSE ONLY
+    file,
+    keywords,
+  ])
   return <Wrapper>
     <WrapperForm className="App">
       <Form>
@@ -126,7 +128,7 @@ function App() {
           </HelpBlock>
         </FormGroup>
 
-        <Button appearance="primary" onClick={(e)=>!validationError && onSubmitCallback(e)}>
+        <Button appearance="primary" onClick={(e) => !validationError && onSubmitCallback(e)}>
           Submit
         </Button>
       </Form><br />
@@ -134,7 +136,7 @@ function App() {
       {
         validationError && <div style={{ display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center' }}>
           <Icon icon='exclamation-triangle' /><p style={{ marginLeft: '10px' }}>
-File field and keywords and required!</p></div>
+            File field and keywords and required!</p></div>
       }
     </WrapperForm >
 
@@ -143,12 +145,12 @@ File field and keywords and required!</p></div>
 
         {data.document && <>
           <Icon icon='file-text' size="2x" />
-          <a href={data.document} download={dataFileName} onClick={downloadCallback}>
+          <a href={data.document} download={dataFileName} >
             <h6>new</h6>
           </a>
           <br />
           <Icon icon='file-text' size="2x" />
-          <a href={data.oldDocument} download={dataFileName} onClick={downloadCallback}>
+          <a href={data.oldDocument} download={oldDataFileName} >
             <h6>old</h6>
           </a>
         </>}
@@ -163,5 +165,5 @@ File field and keywords and required!</p></div>
   </Wrapper>
 }
 
-export default App;
+export default memo(App);
 

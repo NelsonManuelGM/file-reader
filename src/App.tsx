@@ -1,11 +1,12 @@
 
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { Button, ButtonProps, Form, FormControl, FormGroup, HelpBlock, Icon, Uploader } from 'rsuite';
-import { FileType } from 'rsuite/lib/Uploader';
 import 'rsuite/dist/styles/rsuite-default.css';
+import { FileType } from 'rsuite/lib/Uploader';
 import styled from 'styled-components';
-
+import ChucksExample from './Chunks';
 import { uploadFile } from './services/apiServices';
+
 
 const Wrapper = styled.div`
   width: 100vw;
@@ -33,6 +34,20 @@ const WrapperFile = styled.div`
   top: 10%;
 
  `;
+
+const ChucksExampleWrapper = styled.div`
+  background-color: #d3d3d376 ;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 10px;
+  height: 120px;
+  position: absolute;
+  left: 5%;
+  top: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+`;
 
 interface dataType {
   oldDocument?: string
@@ -62,7 +77,7 @@ function App() {
     setKeywords(e.currentTarget.value);
   }
 
-  const fileCallback = (fileParam: any[]) => {
+  const fileCallback = (fileParam: FileType[]) => {
     console.log(fileParam)
     setFile([...file, ...fileParam])
   }
@@ -139,7 +154,6 @@ function App() {
             File field and keywords and required!</p></div>
       }
     </WrapperForm >
-
     {
       data && <WrapperFile>
 
@@ -162,6 +176,10 @@ function App() {
         }
       </WrapperFile>
     }
+
+    <ChucksExampleWrapper>
+      <ChucksExample />
+    </ChucksExampleWrapper>
   </Wrapper>
 }
 
